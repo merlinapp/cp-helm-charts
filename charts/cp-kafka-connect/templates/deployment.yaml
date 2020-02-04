@@ -69,20 +69,24 @@ spec:
             {{- end }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
+          volumeMounts:
+            - mountPath: /kafka/bigquery
+              name: bigquery-credentials
+              readOnly: true
           env:
-            - name: CONNECT_REST_ADVERTISED_HOST_NAME
+            - name: {{ .Values.envPrefix }}REST_ADVERTISED_HOST_NAME
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
-            - name: CONNECT_BOOTSTRAP_SERVERS
+            - name: {{ .Values.envPrefix }}BOOTSTRAP_SERVERS
               value: {{ template "cp-kafka-connect.kafka.bootstrapServers" . }}
-            - name: CONNECT_GROUP_ID
+            - name: {{ .Values.envPrefix }}GROUP_ID
               value: {{ template "cp-kafka-connect.groupId" . }}
-            - name: CONNECT_CONFIG_STORAGE_TOPIC
+            - name: {{ .Values.envPrefix }}CONFIG_STORAGE_TOPIC
               value: {{ template "cp-kafka-connect.fullname" . }}-config
-            - name: CONNECT_OFFSET_STORAGE_TOPIC
+            - name: {{ .Values.envPrefix }}OFFSET_STORAGE_TOPIC
               value: {{ template "cp-kafka-connect.fullname" . }}-offset
-            - name: CONNECT_STATUS_STORAGE_TOPIC
+            - name: {{ .Values.envPrefix }}STATUS_STORAGE_TOPIC
               value: {{ template "cp-kafka-connect.fullname" . }}-status
             - name: CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL
               value: {{ template "cp-kafka-connect.cp-schema-registry.service-name" .}}
@@ -90,8 +94,13 @@ spec:
               value: {{ template "cp-kafka-connect.cp-schema-registry.service-name" .}}
             - name: KAFKA_HEAP_OPTS
               value: "{{ .Values.heapOptions }}"
+            - name: CONNECT_KEY_CONVERTER
+              value: io.confluent.connect.avro.AvroConverter
+            - name: CONNECT_VALUE_CONVERTER
+              value: io.confluent.connect.avro.AvroConverter
+            {{- $prefix := .Values.envPrefix }}  
             {{- range $key, $value := .Values.configurationOverrides }}
-            - name: {{ printf "CONNECT_%s" $key | replace "." "_" | upper | quote }}
+            - name: {{ printf "%s%s" $prefix $key | replace "." "_" | upper | quote }}
               value: {{ $value | quote }}
             {{- end }}
             {{- range $key, $value := .Values.customEnv }}
@@ -99,6 +108,10 @@ spec:
               value: {{ $value | quote }}
             {{- end }}
             {{- if .Values.jmx.port }}
+            - name: JMXHOST
+              value: "localhost"
+            - name: JMXPORT
+              value: "{{ .Values.jmx.port }}"
             - name: KAFKA_JMX_PORT
               value: "{{ .Values.jmx.port }}"
             {{- end }}
@@ -107,6 +120,10 @@ spec:
 {{ toYaml .Values.imagePullSecrets | indent 8 }}
       {{- end }}
       volumes:
+      - name: bigquery-credentials
+        secret:
+          defaultMode: 420
+          secretName: bigquery-credentials-de
       {{- if .Values.prometheus.jmx.enabled }}
       - name: jmx-config
         configMap:

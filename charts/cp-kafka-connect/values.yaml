@@ -4,6 +4,8 @@
 
 replicaCount: 1
 
+envPrefix: CONNECT_
+
 ## Image Info
 ## ref: https://hub.docker.com/r/confluentinc/cp-kafka/
 image: confluentinc/cp-kafka-connect
