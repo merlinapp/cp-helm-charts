@@ -15,15 +15,24 @@ data:
     lowercaseOutputLabelNames: true
     ssl: false
     rules:
+    - pattern : "kafka.connect<type=connect-worker-metrics, connector=([^:]+)><>([^:]+)"
+      name: "cp_kafka_connect_connect_worker_metrics_$2"
+      labels:
+        connector: $1
     - pattern : "kafka.connect<type=connect-worker-metrics>([^:]+):"
       name: "cp_kafka_connect_connect_worker_metrics_$1"
     - pattern : "kafka.connect<type=connect-metrics, client-id=([^:]+)><>([^:]+)"
       name: "cp_kafka_connect_connect_metrics_$1_$2"
-    - pattern : "kafka.connect<type=(source|sink)-task-metrics, connector=(.+), task=(.)><>([^:]+)"
+    - pattern : "kafka.connect<type=(source|sink)-task-metrics, connector=([^:]+), task=(.)><>([^:]+)"
       name: "cp_kafka_connect_$1_task_metrics_$4"
       labels:
         connector: $2
         task: $3
+    - pattern : "kafka.connect<type=task-error-metrics, connector=([^:]+), task=(.)><>([^:]+)"
+      name: "cp_kafka_connect_task_error_metrics_$3"
+      labels:
+        connector: $1
+        task: $2
     - pattern : "debezium.mysql<type=connector-metrics, context=([^:]+), server=([^:]+)><>([^:]+)"
       name: "cp_kafka_debezium_$1_metrics_$3"
       labels:
