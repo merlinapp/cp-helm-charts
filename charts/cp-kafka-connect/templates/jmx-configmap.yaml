@@ -37,11 +37,11 @@ data:
       name: "cp_kafka_debezium_$1_metrics_$3"
       labels:
         server: $2
-    - pattern : "kafka.consumer<type=consumer-fetch-manager-metrics, client-id=connector-consumer-([^:]+), topic=([^:]+)><>([^:]+)"
-      name: "cp_kafka_consumer_fetch_metrics_$3"
-      labels:
-        client: $1
-        topic: $2
+    #- pattern : "kafka.consumer<type=consumer-fetch-manager-metrics, client-id=connector-consumer-([^:]+), topic=([^:]+)><>([^:]+)"
+    #  name: "cp_kafka_consumer_fetch_metrics_$3"
+    #  labels:
+    #    client: $1
+    #    topic: $2
     - pattern : "kafka.connect<type=connector-task-metrics, connector=([^:]+), task=([^:]+)><>status: ([^:]+)"
       name: "cp_kafka_connect_connect_connector_metrics"
       value: 1
